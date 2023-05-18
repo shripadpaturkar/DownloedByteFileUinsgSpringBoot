@@ -1,0 +1,28 @@
+//Delete file
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/files")
+public class FileController {
+    @Autowired
+    private FileRepository fileRepository;
+
+    // ...
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteFile(@PathVariable Long id) {
+        // Check if the file exists in the database
+        if (!fileRepository.existsById(id)) {
+            return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+        }
+
+        // Delete the file from the database
+        fileRepository.deleteById(id);
+
+        return new ResponseEntity<>("File deleted successfully", HttpStatus.OK);
+    }
+}
