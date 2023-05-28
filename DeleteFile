@@ -26,3 +26,76 @@ public class FileController {
         return new ResponseEntity<>("File deleted successfully", HttpStatus.OK);
     }
 }
+
+
+
+//
+
+
+import org.apache.commons.io.IOUtils;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+@Controller
+public class FileUploadController {
+
+    @PostMapping("/upload")
+    public String handleFileUpload(@RequestParam("file") MultipartFile file,
+                                   @RequestParam("moduleName") String moduleName) {
+        if (file.isEmpty()) {
+            // Handle empty file error
+            return "redirect:/uploadError";
+        }
+
+        try {
+            // Create a temporary file to store the uploaded zip file
+            File tempFile = File.createTempFile("temp", ".zip");
+            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+                // Save the uploaded zip file to the temporary file
+                fos.write(file.getBytes());
+            }
+
+            // Extract files from the zip and save them in the database
+            extractAndSaveFiles(tempFile, moduleName);
+
+            // Delete the temporary file
+            tempFile.delete();
+
+            // Redirect to a success page
+            return "redirect:/uploadSuccess";
+        } catch (IOException e) {
+            // Handle file processing error
+            return "redirect:/uploadError";
+        }
+    }
+
+    private void extractAndSaveFiles(File zipFile, String moduleName) throws IOException {
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
+            ZipEntry zipEntry;
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                if (!zipEntry.isDirectory()) {
+                    // Read file content as byte array
+                    byte[] fileContent = IOUtils.toByteArray(zis);
+
+                    // Save the file content in the database with the specified module name
+                    saveFileInDatabase(fileContent, zipEntry.getName(), moduleName);
+                }
+                zis.closeEntry();
+            }
+        }
+    }
+
+    private void saveFileInDatabase(byte[] fileContent, String fileName, String moduleName) {
+        // Implement your code to save the file content in the database
+        // using a suitable data access mechanism (e.g., JPA repository)
+    }
+}
