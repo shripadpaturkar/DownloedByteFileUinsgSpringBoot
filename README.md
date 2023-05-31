@@ -64,3 +64,56 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FileRepository extends JpaRepository<FileEntity, Long> {
 }
+
+
+
+/////////////
+import java.io.*;
+
+public class FileToByteArrayExample {
+
+    public static void main(String[] args) {
+        String folderName = "folderName"; // Replace with your folder name
+        
+        try {
+            // Step 1: Get the URL representing the folder in the classpath
+            ClassLoader classLoader = FileToByteArrayExample.class.getClassLoader();
+            URL folderUrl = classLoader.getResource(folderName);
+            
+            // Step 2: Convert the URL to a file path
+            String folderPath = folderUrl.getPath();
+            
+            // Step 3: Create a File object using the obtained file path
+            File folder = new File(folderPath);
+            
+            // Step 4: Iterate over the files in the folder
+            File[] files = folder.listFiles();
+            for (File file : files) {
+                // Step 5: Read each file into a byte array
+                byte[] byteArray = readFileToByteArray(file);
+                
+                // Use the byte array as needed
+                // ...
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private static byte[] readFileToByteArray(File file) throws IOException {
+        FileInputStream fis = new FileInputStream(file);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        while ((bytesRead = fis.read(buffer)) != -1) {
+            bos.write(buffer, 0, bytesRead);
+        }
+        
+        fis.close();
+        bos.close();
+        
+        return bos.toByteArray();
+    }
+}
+
