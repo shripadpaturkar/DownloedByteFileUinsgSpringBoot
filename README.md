@@ -117,3 +117,27 @@ public class FileToByteArrayExample {
     }
 }
 
+/////////////////////////
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import com.google.gson.Gson;
+
+public class GetMetaInfo {
+    private HashMap<String, String> yourHashMap; // Replace with your actual HashMap
+
+    public void storeDataToJsonFile() {
+        Gson gson = new Gson();
+        String json = gson.toJson(yourHashMap);
+
+        String fileName = "data.json";
+        String filePath = System.getProperty("user.dir") + "/" + fileName;
+
+        try (FileWriter fileWriter = new FileWriter(filePath)) {
+            fileWriter.write(json);
+            System.out.println("Data stored to JSON file: " + filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
